@@ -1,0 +1,219 @@
+
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{titlesec}
+
+\geometry{a4paper, left=3cm, right=2.5cm, top=3cm, bottom=2.5cm}
+
+% Başlıkları biçimlendirme
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+% Başlık sayfası bilgileri
+\title{\textbf{ÇİZGİ TAKİP EDEN ARABA}}
+\author{Salih Emre Poyraz, İshak konya, Remzi kaan Sert, Hakan Çayan Bingöl \\ Danışman: Arş. Gör. Elif Tuba ÖZTÜRK}
+\date{Mayıs 2025}
+
+\begin{document}
+
+% Kapak sayfası
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+    {\Huge\bfseries BİLECİK ŞEYH EDEBALİ ÜNİVERSİTESİ\par}
+    \vspace{1cm}
+    {\Large\bfseries İktisadi ve İdari Bilimler Fakültesi\par}
+    \vspace{0.5cm}
+    {\Large\bfseries YÖNETİM BİLİŞİM SİSTEMLERİ BÖLÜMÜ\par}
+    \vspace{3cm}
+    \includegraphics[width=0.4\textwidth]{BSEU_LOGO.png}\par\vspace{2cm}
+    {\Huge\bfseries ÇİZGİ TAKİP EDEN ARABA\par}
+    \vfill
+    {\Large Salih Emre Poyraz, İshak konya, Remzi kaan Sert, Hakan Çayan Bingöl\par}
+    {\Large Öğrenci No: \par}
+    {\Large Danışman: Arş. Gör. Elif Tuba ÖZTÜRK\par}
+    \vspace{1cm}
+    {\large Mayıs 2025\par}
+\end{titlepage}
+
+% Özet sayfası
+\chapter*{Özet}
+Bu çalışmada, çizgi izleyen ve engellerden kaçınabilen bir otonom robot araç tasarlanmış ve ESP32 mikrodenetleyicisi ile gerçekleştirilmiştir. Robot, zemin üzerine yerleştirilmiş siyah çizgileri takip edebilmekte ve önüne çıkan engelleri ultrasonik sensör yardımıyla algılayarak yönünü değiştirebilmektedir. Projede L298N motor sürücü modülü, üçlü çizgi sensörü, HC-SR04 ultrasonik mesafe sensörü ve 18650 lityum iyon pilleri kullanılmıştır. Robot, iki farklı çalışma moduna sahiptir: 'L' modu çizgi takibi, 'O' modu ise engelden kaçınma içindir. Bluetooth üzerinden modlar arasında geçiş yapılabilir. Ayrıca, çizgi sensörleri tarafından siyah çizgi 4 saniyeden uzun süre algılanmadığında araç otomatik olarak durmaktadır. Sistem düşük maliyetli, kolay monte edilebilir ve yazılım kontrollü bir yapıdadır. Bu yönüyle eğitim ve Ar-Ge amaçlı kullanıma uygundur.
+
+\vspace{0.5cm}
+\noindent \textbf{Anahtar Kelimeler:} ESP32, çizgi izleyen robot, engelden kaçınma, L298N, HC-SR04, otonom araç
+
+% İçindekiler
+\tableofcontents
+
+\chapter{Giriş}
+Robot teknolojileri günümüzün en hızlı gelişen teknolojilerinden biridir. Bu proje kapsamında, temel bir robotik uygulama olan çizgi izleyen ve engelden kaçan otonom araç tasarımı ele alınmıştır.
+
+\chapter{Kullanılan Yazılımlar ve Yöntemler}
+Projede Arduino IDE yazılımı kullanılarak ESP32 mikrodenetleyici programlanmıştır. Kullanılan temel bileşenler:
+\begin{itemize}
+    \item ESP32 Mikrodenetleyici
+    \item L298N Motor Sürücü Modülü
+    \item HC-SR04 Ultrasonik Sensör
+    \item Üçlü Çizgi Sensörü
+    \item 18650 Lityum İyon Pil
+\end{itemize}
+
+\chapter{Uygulamanın Tanıtımı}
+Robotun çalışma prensibi, sensörlerden gelen verilere dayanır. Çizgi takip modunda (L), robot çizgiyi sensörlerle takip eder ve ultrasonik sensörle engel algıladığında durur. Engel kalkınca devam eder. Engel kaçınma modunda (O), robot rastgele sağa ya da sola dönerek engellerden kaçınır.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{circuit_image (1).png}
+    \caption{Devre Bağlantı Şeması}
+    \label{fig:devre}
+\end{figure}
+
+\chapter{Sonuçlar ve Öneriler}
+Tasarlanan robot, düşük maliyetli ve kullanımı kolay bir yapıya sahiptir. Eğitim amaçlı kullanımlarda verimli olacağı düşünülmektedir. Gelecekteki çalışmalarda PID algoritmaları ile robotun daha hassas kontrol edilmesi mümkün olacaktır.
+
+\chapter{Kaynaklar}
+\begin{thebibliography}{9}
+\bibitem{esp32} Espressif Systems, ESP32 Datasheet, 2020.
+\bibitem{l298n} STMicroelectronics, L298N Datasheet, 2000.
+\bibitem{hcsr04} Cytron Technologies, HC-SR04 Ultrasonic Sensor Datasheet, 2013.
+\end{thebibliography}
+
+\chapter{Ekler}
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+
+// Motor pinleri
+int sag_enable = 18;
+int sag_ileri  = 19;
+int sag_geri   = 21;
+int sol_ileri  = 22;
+int sol_geri   = 23;
+int sol_enable = 5;
+
+// Çizgi sensörleri
+int sol_sensor  = 12;
+int orta_sensor = 13;
+int sag_sensor  = 26;
+
+// Ultrasonik sensör
+#define TRIG 17
+#define ECHO 16
+
+// Hız
+const int HIZ = 55;
+
+// Modlar
+enum Mode { LINE, OBSTACLE };
+Mode aktifMod = LINE;
+
+void setup() {
+  pinMode(sag_ileri, OUTPUT); pinMode(sag_geri, OUTPUT);
+  pinMode(sol_ileri, OUTPUT); pinMode(sol_geri, OUTPUT);
+  pinMode(sag_enable, OUTPUT); pinMode(sol_enable, OUTPUT);
+
+  pinMode(sol_sensor, INPUT);
+  pinMode(orta_sensor, INPUT);
+  pinMode(sag_sensor, INPUT);
+
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+
+  Serial.begin(115200);
+  SerialBT.begin("SullyBot");
+  Serial.println("Bluetooth hazır. 'L' veya 'O' gönderin.");
+
+  randomSeed(analogRead(0)); // rastgelelik için
+}
+
+void loop() {
+  int sol  = digitalRead(sol_sensor);
+  int orta = digitalRead(orta_sensor);
+  int sag  = digitalRead(sag_sensor);
+  long mesafe = mesafeOku();
+
+  // Bluetooth komutu
+  if (SerialBT.available()) {
+    char komut = SerialBT.read();
+    if (komut == 'L') {
+      aktifMod = LINE;
+      SerialBT.println("Çizgi İzleme (L) aktif");
+    } else if (komut == 'O') {
+      aktifMod = OBSTACLE;
+      SerialBT.println("Engelden Kaçınma (O) aktif");
+    }
+  }
+
+  if (aktifMod == LINE) {
+    if (mesafe <= 30) {
+      dur();  // Engel varsa dur
+    } else {
+      if (orta == 1) {
+        ileri();
+      } else if (sol == 1) {
+        saga();
+      } else if (sag == 1) {
+        sola();
+      } else {
+        ileri();
+      }
+    }
+  }
+
+  else if (aktifMod == OBSTACLE) {
+    if (mesafe <= 15) {
+      int rastgeleYon = random(0, 2); // 0 veya 1
+      if (rastgeleYon == 0) {
+        saga();
+      } else {
+        sola();
+      }
+      delay(500);
+    } else {
+      ileri();
+    }
+  }
+
+  delay(10);
+}
+
+// Motor Fonksiyonları 
+
+void ileri() {
+  digitalWrite(sag_ileri, HIGH); digitalWrite(sag_geri, LOW);
+  digitalWrite(sol_ileri, LOW);  digitalWrite(sol_geri, HIGH);
+  analogWrite(sag_enable, HIZ);
+  analogWrite(sol_enable, HIZ);
+}
+
+void sola() {
+  digitalWrite(sag_ileri, HIGH); digitalWrite(sag_geri, LOW);
+  digitalWrite(sol_ileri, LOW);  digitalWrite(sol_geri, LOW);
+  analogWrite(sag_enable, HIZ);
+  analogWrite(sol_enable, 0);
+}
+
+void saga() {
+  digitalWrite(sag_ileri, LOW);  digitalWrite(sag_geri, LOW);
+  digitalWrite(sol_ileri, LOW);  digitalWrite(sol_geri, HIGH);
+  analogWrite(sag_enable, 0);
+  analogWrite(sol_enable, HIZ);
+}
+
+void dur() {
+  analogWrite(sag_enable, 0);
+  analogWrite(sol_enable, 0);
+}
+
+// === Mesafe ölçümü ===
+long mesafeOku() {
+  digitalWrite(TRIG, LOW); delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  long sure = pulseIn(ECHO, HIGH, 30000); // max 30ms bekle
+  return (sure == 0) ? 999 : sure / 58;
+}
+\end{document}
